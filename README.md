@@ -20,18 +20,18 @@ cd "/Users/leejiyun/Library/Mobile Documents/com~apple~CloudDocs/Antigravity/App
 
 ### 3. Python HTTP 서버 실행
 ```bash
-python3 -m http.server 8000
+python3 -m http.server 8080
 ```
 
 다음과 같은 메시지가 표시됩니다:
 ```
-Serving HTTP on :: port 8000 (http://[::]:8000/) ...
+Serving HTTP on :: port 8080 (http://[::]:8080/) ...
 ```
 
 ### 4. 브라우저에서 접속
 브라우저를 열고 다음 주소로 접속합니다:
 ```
-http://localhost:8000/index.html
+http://localhost:8080/index.html
 ```
 
 ### 5. 위치 권한 허용
@@ -118,6 +118,6 @@ App_test_bella/
 
 ---
 
-**현재 서버 실행 중**: http://localhost:8000 🟢
+**현재 서버 실행 중**: http://localhost:8080 🟢
 
 브라우저에서 위 주소로 접속하여 앱을 사용하실 수 있습니다!
