@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>British English Learning | Weather Context</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" data-tab="today">
+                <span>today</span>
+                <div class="tab-underline active"></div>
+            </div>
+            <div class="tab" data-tab="1y">
+                <span>1Y</span>
+                <div class="tab-underline"></div>
+            </div>
+        </div>
+
+        <!-- Today View -->
+        <div id="todayView" class="view">
+            <!-- Word Section (Center) -->
+            <div class="word-section">
+                <div id="word" class="word">Loading...</div>
+                <div id="translation" class="translation">로딩 중...</div>
+            </div>
+
+            <!-- Weather Section (Bottom) -->
+            <div class="weather-bottom">
+                <div class="weather-info-left">
+                    <div id="dateDisplay" class="date-display">2026.02.06</div>
+                    <div class="location-weather">
+                        <span id="locationText">South Korea Seoul</span>
+                        <svg id="weatherIcon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <!-- Weather icon will be inserted here -->
+                        </svg>
+                    </div>
+                </div>
+                <div id="temperature" class="temperature-large">12°</div>
+            </div>
+        </div>
+
+        <!-- 1Y View -->
+        <div id="yearView" class="view hidden">
+            <div id="yearGrid" class="year-grid"></div>
+            <div class="year-counter">
+                <span id="daysPassed" class="days-passed">37</span><span class="days-total">/365</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

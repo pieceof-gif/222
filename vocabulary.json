@@ -1,0 +1,194 @@
+{
+  "weather": {
+    "clear": [
+      {
+        "word": "Radiant",
+        "phonetic": "/ˈreɪdiənt/",
+        "definition": "Sending out light; shining or glowing brightly",
+        "example": "The radiant sunshine warmed the cobblestone streets.",
+        "korean": "빛나는"
+      },
+      {
+        "word": "Luminous",
+        "phonetic": "/ˈluːmɪnəs/",
+        "definition": "Full of or shedding light; bright or shining",
+        "example": "The luminous sky stretched endlessly above.",
+        "korean": "빛을 발하는"
+      },
+      {
+        "word": "Brilliant",
+        "phonetic": "/ˈbrɪljənt/",
+        "definition": "Very bright and radiant",
+        "example": "A brilliant day for a stroll through the park.",
+        "korean": "찬란한"
+      }
+    ],
+    "cloudy": [
+      {
+        "word": "Overcast",
+        "phonetic": "/ˌəʊvəˈkɑːst/",
+        "definition": "Covered with clouds; dull and grey",
+        "example": "The overcast sky hinted at rain to come.",
+        "korean": "흐린"
+      },
+      {
+        "word": "Murky",
+        "phonetic": "/ˈmɜːki/",
+        "definition": "Dark and gloomy, especially due to thick mist",
+        "example": "The murky afternoon made everything seem mysterious.",
+        "korean": "어둡고 우울한"
+      },
+      {
+        "word": "Dreary",
+        "phonetic": "/ˈdrɪəri/",
+        "definition": "Dull, bleak, and depressingly monotonous",
+        "example": "A dreary day called for tea and biscuits indoors.",
+        "korean": "음울한"
+      }
+    ],
+    "rainy": [
+      {
+        "word": "Petrichor",
+        "phonetic": "/ˈpɛtrɪkɔː/",
+        "definition": "The pleasant smell that accompanies rain after a dry spell",
+        "example": "The petrichor filled the air as the first drops fell.",
+        "korean": "비 온 뒤 흙냄새"
+      },
+      {
+        "word": "Drizzle",
+        "phonetic": "/ˈdrɪzəl/",
+        "definition": "Light rain falling in very fine drops",
+        "example": "A gentle drizzle misted the windowpanes.",
+        "korean": "이슬비"
+      },
+      {
+        "word": "Sodden",
+        "phonetic": "/ˈsɒdən/",
+        "definition": "Saturated with liquid, especially water; soaked",
+        "example": "The sodden ground squelched beneath our feet.",
+        "korean": "흠뻑 젖은"
+      }
+    ],
+    "snowy": [
+      {
+        "word": "Pristine",
+        "phonetic": "/ˈprɪstiːn/",
+        "definition": "In its original condition; unspoilt",
+        "example": "The pristine snow blanketed the countryside.",
+        "korean": "깨끗한"
+      },
+      {
+        "word": "Crystalline",
+        "phonetic": "/ˈkrɪstəlaɪn/",
+        "definition": "Having the structure and form of a crystal; clear",
+        "example": "Crystalline snowflakes drifted from the sky.",
+        "korean": "수정같은"
+      }
+    ],
+    "foggy": [
+      {
+        "word": "Nebulous",
+        "phonetic": "/ˈnɛbjʊləs/",
+        "definition": "Hazy, vague, indistinct, or confused",
+        "example": "The nebulous fog obscured the path ahead.",
+        "korean": "흐릿한"
+      },
+      {
+        "word": "Obscure",
+        "phonetic": "/əbˈskjʊə/",
+        "definition": "Not clearly seen or easily distinguished",
+        "example": "The obscure silhouettes emerged from the mist.",
+        "korean": "불분명한"
+      }
+    ]
+  },
+  "context": {
+    "busy": [
+      {
+        "word": "Bustling",
+        "phonetic": "/ˈbʌsəlɪŋ/",
+        "definition": "Full of energetic and noisy activity",
+        "example": "The bustling market square was alive with vendors.",
+        "korean": "북적이는"
+      },
+      {
+        "word": "Thriving",
+        "phonetic": "/ˈθraɪvɪŋ/",
+        "definition": "Prosperous and growing; flourishing",
+        "example": "A thriving community of artists and musicians.",
+        "korean": "번창하는"
+      },
+      {
+        "word": "Vibrant",
+        "phonetic": "/ˈvaɪbrənt/",
+        "definition": "Full of energy and life",
+        "example": "The vibrant city never sleeps.",
+        "korean": "활기찬"
+      }
+    ],
+    "quiet": [
+      {
+        "word": "Tranquil",
+        "phonetic": "/ˈtræŋkwɪl/",
+        "definition": "Free from disturbance; calm",
+        "example": "A tranquil evening by the riverside.",
+        "korean": "고요한"
+      },
+      {
+        "word": "Serene",
+        "phonetic": "/sɪˈriːn/",
+        "definition": "Calm, peaceful, and untroubled",
+        "example": "The serene countryside offered respite from the city.",
+        "korean": "평온한"
+      }
+    ],
+    "celebration": [
+      {
+        "word": "Jubilant",
+        "phonetic": "/ˈdʒuːbɪlənt/",
+        "definition": "Feeling or expressing great happiness and triumph",
+        "example": "The jubilant crowd celebrated the victory.",
+        "korean": "환희에 찬"
+      },
+      {
+        "word": "Exuberant",
+        "phonetic": "/ɪɡˈzuːbərənt/",
+        "definition": "Filled with lively energy and excitement",
+        "example": "An exuberant display of fireworks lit the sky.",
+        "korean": "열정적인"
+      }
+    ],
+    "politics": [
+      {
+        "word": "Contentious",
+        "phonetic": "/kənˈtɛnʃəs/",
+        "definition": "Causing or likely to cause disagreement",
+        "example": "A contentious debate in Parliament today.",
+        "korean": "논쟁적인"
+      },
+      {
+        "word": "Polarising",
+        "phonetic": "/ˈpəʊləraɪzɪŋ/",
+        "definition": "Dividing into sharply contrasting groups",
+        "example": "The polarising policy sparked heated discussions.",
+        "korean": "양극화하는"
+      }
+    ],
+    "default": [
+      {
+        "word": "Splendid",
+        "phonetic": "/ˈsplɛndɪd/",
+        "definition": "Magnificent; very impressive",
+        "example": "What a splendid day to learn something new!",
+        "korean": "훌륭한"
+      },
+      {
+        "word": "Marvellous",
+        "phonetic": "/ˈmɑːvələs/",
+        "definition": "Causing great wonder; extraordinary",
+        "example": "A marvellous opportunity to expand your vocabulary.",
+        "korean": "놀라운"
+      }
+    ]
+  }
+}

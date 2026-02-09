@@ -1,0 +1,313 @@
+/* ============================================
+   RESET & BASE STYLES
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-color: #E8F4F8;
+    --text-color: #1A1A1A;
+    --text-secondary: #1A1A1A99;
+
+    /* Responsive Vertical Fit Settings */
+    /* Target: Fill screen height proportionally */
+    /* 2.1vh * ~28 rows = ~60vh grid height */
+    /* 6.5vw * 13 cols = ~85vw grid width */
+    --dot-size: min(2.1vh, 6.5vw);
+    --gap-size: calc(var(--dot-size) * 0.20 + 2px);
+    /* 20% ratio + 2px extra spacing */
+    /* 20% gap ratio */
+}
+
+html {
+    overflow: hidden;
+    background: #FFFFFF;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+/* ============================================
+   CONTAINER
+   ============================================ */
+
+.container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.container.year-active {
+    background-color: #FFFFFF !important;
+}
+
+/* ============================================
+   TABS
+   ============================================ */
+
+.tabs {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 40px;
+    justify-content: center;
+    z-index: 10;
+    position: relative;
+}
+
+.tab {
+    cursor: pointer;
+    position: relative;
+    padding-bottom: 4px;
+}
+
+.tab span {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.tab.active span {
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.tab-underline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--text-color);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.tab-underline.active {
+    opacity: 1;
+}
+
+/* 1Y 탭 활성화 시 탭 텍스트 흰색 */
+body:has(#yearView:not(.hidden)) .tab span {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+body:has(#yearView:not(.hidden)) .tab.active span {
+    color: #FFFFFF;
+}
+
+body:has(#yearView:not(.hidden)) .tab-underline {
+    background-color: #FFFFFF;
+}
+
+/* ============================================
+   VIEWS
+   ============================================ */
+
+.view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.view.hidden {
+    display: none;
+}
+
+#yearView.hidden {
+    display: none !important;
+}
+
+/* ============================================
+   TODAY VIEW - WORD SECTION
+   ============================================ */
+
+.word-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.word {
+    font-size: 64px;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.translation {
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+}
+
+/* ============================================
+   TODAY VIEW - WEATHER BOTTOM
+   ============================================ */
+
+.weather-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 20px 0 14px 0;
+    /* Reduced bottom padding to move text down 6px */
+}
+
+.weather-info-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.date-display {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-color);
+    line-height: 1.5;
+    margin-bottom: 4px;
+    cursor: pointer;
+}
+
+.location-weather {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-color);
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.location-weather svg {
+    width: 18px;
+    height: 18px;
+}
+
+.temperature-large {
+    font-size: 48px;
+    font-weight: 400;
+    line-height: 1;
+    cursor: pointer;
+}
+
+/* ============================================
+   1Y VIEW - GRID
+   ============================================ */
+
+#yearView {
+    background-color: #000000 !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    /* Start from top to allow scrolling */
+    padding: 20px 20px 100px 20px;
+    /* Add bottom padding for scroll */
+    overflow-y: auto;
+    /* Enable scroll */
+    flex: 1;
+    /* Take remaining space */
+}
+
+body:has(#yearView:not(.hidden)) {
+    background: #000000 !important;
+    overflow: hidden;
+    /* Prevent scroll on body */
+}
+
+html:has(#yearView:not(.hidden)) {
+    background: #000000 !important;
+    overflow: hidden;
+    /* Prevent scroll on html */
+}
+
+.year-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--gap-size);
+    padding: 0 10px;
+    /* Slight side padding */
+    width: 100%;
+    /* No Max Width - Let it scale with VW/VH units */
+    margin: 0 auto;
+}
+
+.day-dot {
+    width: var(--dot-size);
+    height: var(--dot-size);
+    border-radius: 50%;
+    background-color: #E0E0E0;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.day-dot:hover {
+    transform: scale(1.2);
+}
+
+.year-counter {
+    margin-top: 20px;
+    /* Spacing below grid */
+    font-size: 12.8px;
+    font-weight: 400;
+    text-align: center;
+}
+
+.days-passed {
+    color: #FFFFFF;
+}
+
+.days-total {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+/* We rely on viewport units (vh/vw) in :root for main scaling. 
+   Media queries can adjust other elements if needed. */
+
+@media (max-width: 480px) {
+    .word {
+        font-size: 48px;
+    }
+
+    .translation {
+        font-size: 18px;
+    }
+
+    .temperature-large {
+        font-size: 56px;
+    }
+
+    /* Ensure padding for very small screens */
+    .year-grid {
+        padding: 0 10px;
+    }
+}

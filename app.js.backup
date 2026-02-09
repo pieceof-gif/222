@@ -1,0 +1,539 @@
+// ============================================
+// BRITISH ENGLISH LEARNING APP
+// Location-Aware Vocabulary with Weather Context
+// ============================================
+
+'use strict';
+
+// ============================================
+// 0. CONFIGURATION
+// ============================================
+
+const API_CONFIG = {
+    geocoding: 'https://nominatim.openstreetmap.org/reverse',
+    weather: 'https://api.open-meteo.com/v1/forecast'
+};
+
+// DOM Elements
+const locationNameEl = document.getElementById('locationName');
+const temperatureEl = document.getElementById('temperature');
+const weatherIconEl = document.getElementById('weatherIcon');
+const tempRangeEl = document.getElementById('tempRange');
+const wordEl = document.getElementById('word');
+const translationEl = document.getElementById('translation');
+
+// Tab Elements
+const tabs = document.querySelectorAll('.tab');
+const todayView = document.getElementById('todayView');
+const yearView = document.getElementById('yearView');
+const yearGrid = document.getElementById('yearGrid');
+
+// ============================================
+// 1. DYNAMIC BACKGROUND & TEXT COLOR
+// ============================================
+
+function updateBackgroundColor() {
+    const hour = new Date().getHours();
+    const { weatherCode, pm25 } = currentWeather;
+
+    let bgColor, textColor, secondaryColor;
+
+    // 미세먼지가 심한 경우 (우선순위 높음)
+    if (pm25 > 75) {
+        bgColor = '#4A4A4A'; // 거무튀튀한 회색
+        textColor = '#FFFFFF';
+        secondaryColor = 'rgba(255, 255, 255, 0.6)';
+    }
+    // 새벽 (4:00 - 6:00)
+    else if (hour >= 4 && hour < 6) {
+        bgColor = '#E8C4D8'; // 옅은 핑크
+        textColor = '#000000';
+        secondaryColor = 'rgba(0, 0, 0, 0.6)';
+    }
+    // 동이 트는 시간 (6:00 - 7:00)
+    else if (hour >= 6 && hour < 7) {
+        bgColor = '#D4B5E8'; // 옅은 보라
+        textColor = '#000000';
+        secondaryColor = 'rgba(0, 0, 0, 0.6)';
+    }
+    // 화창한 낮 (7:00 - 17:00) - 맑은 날씨
+    else if (hour >= 7 && hour < 17 && weatherCode === 0) {
+        bgColor = '#87CEEB'; // 깨끗한 하늘색
+        textColor = '#000000';
+        secondaryColor = 'rgba(0, 0, 0, 0.6)';
+    }
+    // 흐린 낮 (7:00 - 17:00)
+    else if (hour >= 7 && hour < 17) {
+        bgColor = '#B0C4DE'; // 연한 회색-파랑
+        textColor = '#000000';
+        secondaryColor = 'rgba(0, 0, 0, 0.6)';
+    }
+    // 저녁 (17:00 - 19:00)
+    else if (hour >= 17 && hour < 19) {
+        bgColor = '#8B7BA8'; // 어두운 보라
+        textColor = '#FFFFFF';
+        secondaryColor = 'rgba(255, 255, 255, 0.6)';
+    }
+    // 밤 (19:00 - 4:00)
+    else {
+        bgColor = '#000000'; // 블랙
+        textColor = '#FFFFFF';
+        secondaryColor = 'rgba(255, 255, 255, 0.6)';
+    }
+
+    // Apply colors
+    document.body.style.setProperty('--bg-color', bgColor);
+    document.body.style.setProperty('--text-color', textColor);
+    document.body.style.setProperty('--text-secondary', secondaryColor);
+}
+
+// ============================================
+// 2. GLOBAL STATE
+// ============================================
+
+let vocabularyData = null;
+let currentWeather = {
+    temperature: 0,
+    temperatureMin: 0,
+    temperatureMax: 0,
+    weatherCode: 0,
+    windSpeed: 0,
+    pm25: 0
+};
+let currentWord = null;
+let isPlaying = false;
+let currentUtterance = null;
+
+// ============================================
+// 3. INITIALIZATION
+// ============================================
+
+async function init() {
+    try {
+        await loadVocabulary();
+        await getWeatherData();
+        selectWord();
+        updateBackgroundColor();
+
+        // Initialize tabs and gestures
+        initializeTabs();
+        initializeSwipeGestures();
+
+        // Update background every minute
+        setInterval(updateBackgroundColor, 60000);
+    } catch (error) {
+        console.error('❌ Initialization failed:', error);
+        wordEl.textContent = 'Error';
+        translationEl.textContent = '오류가 발생했습니다';
+    }
+}
+
+// ============================================
+// 4. VOCABULARY LOADING
+// ============================================
+
+async function loadVocabulary() {
+    try {
+        // Add cache-busting parameter
+        const cacheBuster = `?v=${Date.now()}`;
+        const response = await fetch(`vocabulary.json${cacheBuster}`);
+        if (!response.ok) throw new Error('Failed to load vocabulary');
+        vocabularyData = await response.json();
+        console.log('✅ Vocabulary loaded');
+    } catch (error) {
+        console.error('❌ Vocabulary loading failed:', error);
+        throw error;
+    }
+}
+
+// ============================================
+// 5. WEATHER DATA
+        }
+
+navigator.geolocation.getCurrentPosition(resolve, reject, {
+    timeout: 10000,
+    maximumAge: 300000
+});
+    });
+}
+
+async function fetchWeatherData(lat, lon) {
+    const url = `${API_CONFIG.weather}?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Weather API failed');
+    return await response.json();
+}
+
+function updateWeatherData(data) {
+    currentWeather.temperature = Math.round(data.current.temperature_2m);
+    currentWeather.temperatureMin = Math.round(data.daily.temperature_2m_min[0]);
+    currentWeather.temperatureMax = Math.round(data.daily.temperature_2m_max[0]);
+    currentWeather.weatherCode = data.current.weather_code;
+    currentWeather.windSpeed = data.current.wind_speed_10m;
+    currentWeather.pm25 = Math.random() * 100; // Simulated PM2.5
+}
+
+function setDefaultWeather() {
+    currentWeather = {
+        temperature: 20,
+        temperatureMin: 15,
+        temperatureMax: 25,
+        weatherCode: 0,
+        windSpeed: 10,
+        pm25: 30
+    };
+    updateWeatherUI();
+}
+
+// ============================================
+// 6. UI UPDATES
+// ============================================
+
+function updateWeatherUI() {
+    const { temperature, temperatureMin, temperatureMax, weatherCode } = currentWeather;
+
+    // Temperature (without ° symbol)
+    temperatureEl.textContent = `${temperature}`;
+
+    // Temperature range (without middle -)
+    tempRangeEl.textContent = `today ${temperatureMin}° ${temperatureMax}°`;
+
+    // Weather icon (SVG)
+    updateWeatherIcon(weatherCode);
+}
+
+function updateWeatherIcon(code) {
+    const iconEl = document.getElementById('weatherIcon');
+    if (!iconEl) return;
+
+    // Clear existing icon
+    iconEl.innerHTML = '';
+
+    // Get Feather Icon SVG path based on weather code
+    let iconPath = '';
+
+    // WMO Weather interpretation codes
+    if (code === 0) {
+        // Clear - Sun
+        iconPath = `
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        `;
+    } else if (code <= 3) {
+        // Partly cloudy - Cloud
+        iconPath = `
+            <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+        `;
+    } else if (code <= 48) {
+        // Fog - Cloud
+        iconPath = `
+            <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+        `;
+    } else if (code <= 67) {
+        // Rain - Cloud Rain
+        iconPath = `
+            <line x1="16" y1="13" x2="16" y2="21"></line>
+            <line x1="8" y1="13" x2="8" y2="21"></line>
+            <line x1="12" y1="15" x2="12" y2="23"></line>
+            <path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"></path>
+        `;
+    } else if (code <= 77) {
+        // Snow - Cloud Snow
+        iconPath = `
+            <path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"></path>
+            <line x1="8" y1="16" x2="8.01" y2="16"></line>
+            <line x1="8" y1="20" x2="8.01" y2="20"></line>
+            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+            <line x1="12" y1="22" x2="12.01" y2="22"></line>
+            <line x1="16" y1="16" x2="16.01" y2="16"></line>
+            <line x1="16" y1="20" x2="16.01" y2="20"></line>
+        `;
+    } else if (code <= 82) {
+        // Rain showers - Cloud Rain
+        iconPath = `
+            <line x1="16" y1="13" x2="16" y2="21"></line>
+            <line x1="8" y1="13" x2="8" y2="21"></line>
+            <line x1="12" y1="15" x2="12" y2="23"></line>
+            <path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"></path>
+        `;
+    } else if (code <= 86) {
+        // Snow showers - Cloud Snow
+        iconPath = `
+            <path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"></path>
+            <line x1="8" y1="16" x2="8.01" y2="16"></line>
+            <line x1="8" y1="20" x2="8.01" y2="20"></line>
+            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+            <line x1="12" y1="22" x2="12.01" y2="22"></line>
+            <line x1="16" y1="16" x2="16.01" y2="16"></line>
+            <line x1="16" y1="20" x2="16.01" y2="20"></line>
+        `;
+    } else {
+        // Thunderstorm - Cloud Lightning
+        iconPath = `
+            <path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"></path>
+            <polyline points="13 11 9 17 15 17 11 23"></polyline>
+        `;
+    }
+
+    iconEl.innerHTML = iconPath;
+}
+
+function getWeatherType(code) {
+    if (code === 0) return 'clear';
+    if (code <= 3) return 'cloudy';
+    if (code <= 67) return 'rainy';
+    if (code <= 77) return 'snowy';
+    return 'stormy';
+}
+
+// ============================================
+// 7. WORD SELECTION
+// ============================================
+
+function selectWord() {
+    if (!vocabularyData) {
+        console.error('Vocabulary not loaded');
+        return;
+    }
+
+    const weatherType = getWeatherType(currentWeather.weatherCode);
+    const weatherWords = vocabularyData.weather[weatherType];
+
+    let selectedWord;
+    if (weatherWords && weatherWords.length > 0) {
+        selectedWord = weatherWords[Math.floor(Math.random() * weatherWords.length)];
+    } else {
+        const defaultWords = vocabularyData.context.default;
+        selectedWord = defaultWords[Math.floor(Math.random() * defaultWords.length)];
+    }
+
+    currentWord = selectedWord;
+    displayWord(selectedWord);
+}
+
+function getWeatherType(code) {
+    if (code === 0) return 'clear';
+    if (code <= 3) return 'cloudy';
+    if (code <= 67) return 'rainy';
+    if (code <= 77) return 'snowy';
+    return 'stormy';
+}
+
+function displayWord(wordData) {
+    // Display only the word
+    wordEl.textContent = wordData.word;
+
+    // Display Korean translation (60% opacity handled by CSS)
+    translationEl.textContent = wordData.korean || wordData.definition;
+}
+
+// ============================================
+// 8. SPEECH SYNTHESIS (Text Touch)
+// ============================================
+
+function playWord() {
+    if (!currentWord) return;
+
+    if (isPlaying) {
+        // Stop playing
+        window.speechSynthesis.cancel();
+        isPlaying = false;
+    } else {
+        // Start playing
+        const text = `${currentWord.word}. ${currentWord.definition}. ${currentWord.example}`;
+        currentUtterance = new SpeechSynthesisUtterance(text);
+        currentUtterance.lang = 'en-GB';
+        currentUtterance.rate = 0.9;
+        currentUtterance.pitch = 1.0;
+
+        currentUtterance.onend = () => {
+            isPlaying = false;
+        };
+
+        currentUtterance.onerror = () => {
+            isPlaying = false;
+        };
+
+        window.speechSynthesis.speak(currentUtterance);
+        isPlaying = true;
+    }
+}
+
+// Add click listeners to word and translation
+wordEl.addEventListener('click', playWord);
+translationEl.addEventListener('click', playWord);
+
+// ============================================
+// 9. ERROR HANDLING
+// ============================================
+
+function handleError(error) {
+    console.error('❌ Error:', error);
+    wordEl.textContent = 'Error';
+    translationEl.textContent = '오류가 발생했습니다';
+}
+
+// ============================================
+// 10. TAB SWITCHING & NAVIGATION
+// ============================================
+
+let currentView = 'today';
+let currentDate = new Date();
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartTime = 0;
+
+function initializeTabs() {
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const tabName = tab.dataset.tab;
+            switchTab(tabName);
+        });
+    });
+}
+
+function switchTab(tabName) {
+    currentView = tabName;
+
+    // Update tab UI
+    tabs.forEach(t => {
+        const isActive = t.dataset.tab === tabName;
+        t.classList.toggle('active', isActive);
+        t.querySelector('.tab-underline').classList.toggle('active', isActive);
+    });
+
+    // Update view visibility
+    if (tabName === 'today') {
+        todayView.classList.remove('hidden');
+        yearView.classList.add('hidden');
+    } else {
+        todayView.classList.add('hidden');
+        yearView.classList.remove('hidden');
+        generate365Grid();
+    }
+}
+
+// ============================================
+// 11. SWIPE NAVIGATION (Today View)
+// ============================================
+
+function initializeSwipeGestures() {
+    todayView.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchStartTime = Date.now();
+    });
+
+    todayView.addEventListener('touchend', (e) => {
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        const touchDuration = Date.now() - touchStartTime;
+
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = touchEndY - touchStartY;
+
+        // Swipe detection (horizontal > 50px, duration < 300ms)
+        if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > Math.abs(deltaY) && touchDuration < 300) {
+            if (deltaX > 0) {
+                navigateToNextDay();
+            } else {
+                navigateToPreviousDay();
+            }
+        }
+        // Tap detection (movement < 10px, duration < 200ms)
+        else if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10 && touchDuration < 200) {
+            const target = e.target;
+            if (target.id === 'word' || target.id === 'translation') {
+                playWord();
+            }
+        }
+    });
+}
+
+function navigateToPreviousDay() {
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() - 1);
+    currentDate = newDate;
+    updateDateDisplay();
+}
+
+function navigateToNextDay() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const nextDate = new Date(currentDate);
+    nextDate.setDate(nextDate.getDate() + 1);
+    nextDate.setHours(0, 0, 0, 0);
+
+    if (nextDate <= today) {
+        currentDate = nextDate;
+        updateDateDisplay();
+    }
+}
+
+function updateDateDisplay() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const checkDate = new Date(currentDate);
+    checkDate.setHours(0, 0, 0, 0);
+
+    if (checkDate.getTime() === today.getTime()) {
+        tempRangeEl.textContent = `today ${currentWeather.temperatureMin}° ${currentWeather.temperatureMax}°`;
+    } else {
+        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const day = String(currentDate.getDate()).padStart(2, '0');
+        tempRangeEl.textContent = `${month}/${day} ${currentWeather.temperatureMin}° ${currentWeather.temperatureMax}°`;
+    }
+}
+
+// ============================================
+// 12. 365 DAY GRID (1Y View)
+// ============================================
+
+function generate365Grid() {
+    if (yearGrid.children.length > 0) return;
+
+    const today = new Date();
+    const oneYearAgo = new Date(today);
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
+
+    for (let i = 0; i < 365; i++) {
+        const date = new Date(oneYearAgo);
+        date.setDate(date.getDate() + i);
+
+        const dot = document.createElement('div');
+        dot.className = 'day-dot';
+        dot.dataset.date = date.toISOString().split('T')[0];
+
+        const color = getRandomWeatherColor();
+        dot.style.backgroundColor = color;
+
+        dot.addEventListener('click', () => {
+            currentDate = new Date(date);
+            switchTab('today');
+            updateDateDisplay();
+        });
+
+        yearGrid.appendChild(dot);
+    }
+}
+
+function getRandomWeatherColor() {
+    const colors = ['#FFD700', '#87CEEB', '#4682B4', '#B0E0E6', '#708090'];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
+// ============================================
+// 13. START APP
+// ============================================
+
+init();
+console.log('🚀 British English Learning App initialized');
