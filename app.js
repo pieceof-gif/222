@@ -149,6 +149,9 @@ function selectWord() {
 
     wordEl.textContent = currentWord.word || 'Loading...';
     translationEl.textContent = currentWord.korean || currentWord.definition || '로딩 중...';
+
+    // Log selected word context
+    console.log(`📖 Selected: ${currentWord.word} (Temp: ${currentWeather.temperature}°C, Code: ${currentWeather.weatherCode})`);
 }
 
 // ============================================
@@ -163,6 +166,9 @@ let currentWeather = {
     windSpeed: 0,
     pm25: 0
 };
+// Store the actual API-fetched weather for today
+let realTodayWeather = null;
+
 let currentWord = null;
 let isPlaying = false;
 let currentUtterance = null;
@@ -173,23 +179,107 @@ async function getWeatherData() {
         const position = await getCurrentPosition();
         const { latitude, longitude } = position.coords;
 
-        const locationName = await getLocationName(latitude, longitude);
-        locationTextEl.textContent = locationName;
+        await getLocationName(latitude, longitude); // Updates locationTextEl internally
 
         const weatherData = await fetchWeatherData(latitude, longitude);
-        updateWeatherData(weatherData);
-        updateWeatherUI();
-        updateDateDisplay();
 
-        // Relookup word (and color) for Today
-        selectWord();
-        updateBackgroundColor();
+        // Parse API data into our format
+        const parsedWeather = parseWeatherData(weatherData);
+
+        // Save as "Real Today Weather"
+        realTodayWeather = { ...parsedWeather };
+
+        // Initial update
+        updateAppForDate(currentDate);
 
         console.log('✅ Weather data loaded');
     } catch (error) {
         console.error('❌ Weather data failed:', error);
         setDefaultWeather();
     }
+}
+
+function parseWeatherData(data) {
+    return {
+        temperature: Math.round(data.current.temperature_2m),
+        temperatureMin: Math.round(data.daily.temperature_2m_min[0]),
+        temperatureMax: Math.round(data.daily.temperature_2m_max[0]),
+        weatherCode: data.current.weather_code,
+        windSpeed: data.current.wind_speed_10m,
+        pm25: Math.random() * 100 // Mock PM2.5 as API doesn't provide it freely
+    };
+}
+
+// ---------------------------------------------------------
+// NEW: Historical Weather Generator (Mock based on Season)
+// ---------------------------------------------------------
+function generateHistoricalWeather(date) {
+    const month = date.getMonth(); // 0-11
+
+    // Seoul Monthly Temp Averages (Approx)
+    // Jan: -2, Feb: 0, Mar: 6, Apr: 13, May: 18, Jun: 22
+    // Jul: 25, Aug: 26, Sep: 21, Oct: 14, Nov: 7, Dec: 0
+    const montlyTemps = [-2, 0, 6, 13, 18, 22, 25, 26, 21, 14, 7, 0];
+    const baseTemp = montlyTemps[month];
+
+    // Random variation (-3 to +3)
+    const variance = Math.floor(Math.random() * 7) - 3;
+    const temp = baseTemp + variance;
+
+    // Weather Codes based on Season
+    // Winter (Dec-Feb): Clear(0), Cloud(3), Snow(71)
+    // Spring (Mar-May): Clear(0), Cloud(3), Rain(61)
+    // Summer (Jun-Aug): Rain(61), Heavy Rain(63), Cloud(3)
+    // Fall (Sep-Nov): Clear(0), Cloud(3)
+
+    let codes = [0, 1, 2, 3]; // Default mainly clear/cloudy
+
+    if (month === 11 || month === 0 || month === 1) {
+        // Winter
+        codes = [0, 1, 3, 71, 73, 0, 0]; // Higher chance of clear/snow
+    } else if (month >= 5 && month <= 7) {
+        // Summer
+        codes = [0, 3, 61, 63, 80, 51]; // Rain common
+    }
+
+    const randomCode = codes[Math.floor(Math.random() * codes.length)];
+
+    return {
+        temperature: temp,
+        temperatureMin: temp - 5,
+        temperatureMax: temp + 5,
+        weatherCode: randomCode,
+        windSpeed: Math.floor(Math.random() * 10),
+        pm25: Math.floor(Math.random() * 50)
+    };
+}
+
+function updateAppForDate(date) {
+    // 1. Determine Weather
+    const isToday = isSameDay(date, new Date());
+
+    if (isToday && realTodayWeather) {
+        currentWeather = { ...realTodayWeather };
+        console.log(`📅 Date is TODAY. Using Real Weather: ${currentWeather.temperature}°C`);
+    } else {
+        // Generate mock history
+        currentWeather = generateHistoricalWeather(date);
+        console.log(`📅 Date is PAST/FUTURE. Generated Weather: ${currentWeather.temperature}°C`);
+    }
+
+    // 2. Select Word (Context-based)
+    selectWord();
+
+    // 3. Update UI
+    updateWeatherUI();
+    updateDateDisplay();
+    updateBackgroundColor();
+}
+
+function isSameDay(d1, d2) {
+    return d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate();
 }
 
 function getCurrentPosition() {
@@ -208,6 +298,9 @@ function getCurrentPosition() {
 
 async function getLocationName(lat, lon) {
     try {
+        // Only fetch if not already set or simple default
+        if (locationTextEl.textContent !== 'Location...') return;
+
         const url = `${API_CONFIG.geocoding}?lat=${lat}&lon=${lon}&format=json&accept-language=en`;
         const response = await fetch(url);
         const data = await response.json();
@@ -218,9 +311,14 @@ async function getLocationName(lat, lon) {
             data.address.county ||
             'Seoul';
 
+        // We'll just stick to "Seoul, Korea" as requested mostly, 
+        // but let's allow dynamic if valid logic exists. 
+        // For now adhering to existing behavior usually.
+        locationTextEl.textContent = 'Seoul, Korea';
         return 'Seoul, Korea';
     } catch (error) {
         console.error('Location name fetch failed:', error);
+        locationTextEl.textContent = 'Seoul, Korea';
         return 'Seoul, Korea';
     }
 }
@@ -232,25 +330,16 @@ async function fetchWeatherData(lat, lon) {
     return await response.json();
 }
 
-function updateWeatherData(data) {
-    currentWeather.temperature = Math.round(data.current.temperature_2m);
-    currentWeather.temperatureMin = Math.round(data.daily.temperature_2m_min[0]);
-    currentWeather.temperatureMax = Math.round(data.daily.temperature_2m_max[0]);
-    currentWeather.weatherCode = data.current.weather_code;
-    currentWeather.windSpeed = data.current.wind_speed_10m;
-    currentWeather.pm25 = Math.random() * 100;
-}
-
 function setDefaultWeather() {
-    currentWeather = {
+    const defaultData = {
         temperature: 20, temperatureMin: 15, temperatureMax: 25,
         weatherCode: 0, windSpeed: 10, pm25: 30
     };
+    realTodayWeather = defaultData;
+    currentWeather = defaultData;
+
     locationTextEl.textContent = 'Seoul, Korea';
-    updateWeatherUI();
-    updateDateDisplay();
-    selectWord();
-    updateBackgroundColor();
+    updateAppForDate(currentDate);
 }
 
 function updateWeatherUI() {
@@ -473,9 +562,7 @@ function navigateToPreviousDay() {
     const newDate = new Date(currentDate);
     newDate.setDate(newDate.getDate() - 1);
     currentDate = newDate;
-    updateDateDisplay();
-    selectWord();
-    updateBackgroundColor();
+    updateAppForDate(currentDate);
 }
 
 function navigateToNextDay() {
@@ -488,9 +575,7 @@ function navigateToNextDay() {
 
     if (nextDate <= today) {
         currentDate = nextDate;
-        updateDateDisplay();
-        selectWord();
-        updateBackgroundColor();
+        updateAppForDate(currentDate);
     }
 }
 
@@ -528,10 +613,8 @@ function generate365Grid() {
             if (date > today) return;
 
             currentDate = new Date(date);
-            selectWord();
-            updateBackgroundColor();
             switchTab('today');
-            updateDateDisplay();
+            updateAppForDate(currentDate);
         });
 
         yearGrid.appendChild(dot);
@@ -545,9 +628,7 @@ function generate365Grid() {
 async function init() {
     try {
         await loadVocabulary();
-        await getWeatherData();
-        selectWord();
-        updateBackgroundColor();
+        await getWeatherData(); // This now calls updateAppForDate(currentDate) internally once loaded
 
         preloadVoices(); // Force voice loading early
         initializeTabs();
