@@ -9,6 +9,24 @@
 </head>
 
 <body>
+    <!-- Offline View -->
+    <div id="offlineView" class="offline-view hidden">
+        <div class="offline-content">
+            <div class="offline-icon" id="offlineIcon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M22.61 16.95A5 5 0 0 0 18 10h-1.26a8 8 0 0 0-7.05-6M5 5a8 8 0 0 0 4 15h9a5 5 0 0 0 1.7-.3">
+                    </path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+            </div>
+            <h1 class="offline-title">Offline</h1>
+            <p class="offline-text">Your network is unavailable.<br>Check your data or WiFi connection.</p>
+            <button id="retryBtn" class="retry-btn">Retry</button>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
     <div class="container">
         <!-- Tabs -->
         <div class="tabs">

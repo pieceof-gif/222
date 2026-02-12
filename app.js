@@ -472,6 +472,10 @@ function playWord() {
     };
 
     window.speechSynthesis.speak(currentUtterance);
+
+    // Haptic Feedback (Native Bridge or Web Fallback)
+    triggerHaptic('light');
+
     isPlaying = true;
 }
 
@@ -486,6 +490,9 @@ function playText(text) {
     }
 
     window.speechSynthesis.speak(utterance);
+
+    // Haptic Feedback (Native Bridge or Web Fallback)
+    triggerHaptic('light');
 }
 
 // ============================================
@@ -621,11 +628,29 @@ function generate365Grid() {
     }
 }
 
+// Haptic Feedback Helper
+function triggerHaptic(type = 'light') {
+    // 1. Try Native Haptic Bridge (Flutter)
+    if (window.HapticChannel) {
+        window.HapticChannel.postMessage(type);
+        return;
+    }
+
+    // 2. Fallback to Web Vibration API
+    if (navigator.vibrate) {
+        // Shorter duration for "crisp" feel
+        navigator.vibrate(10);
+    }
+}
+
 // ============================================
 // 8. INITIALIZATION
 // ============================================
 
 async function init() {
+    // 0. Initialize Offline Detection FIRST
+    initializeOfflineDetection();
+
     try {
         await loadVocabulary();
         await getWeatherData(); // This now calls updateAppForDate(currentDate) internally once loaded
@@ -643,6 +668,41 @@ async function init() {
         wordEl.textContent = 'Error';
         translationEl.textContent = '오류가 발생했습니다';
     }
+}
+
+function initializeOfflineDetection() {
+    const offlineView = document.getElementById('offlineView');
+    const retryBtn = document.getElementById('retryBtn');
+
+    function updateOnlineStatus() {
+        if (navigator.onLine) {
+            if (offlineView) offlineView.classList.add('hidden');
+        } else {
+            if (offlineView) offlineView.classList.remove('hidden');
+        }
+    }
+
+    if (!offlineView || !retryBtn) {
+        console.warn('Offline view elements not found');
+        return;
+    }
+
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
+    retryBtn.addEventListener('click', () => {
+        if (navigator.onLine) {
+            offlineView.classList.add('hidden');
+            // Optional: Refresh data
+            getWeatherData();
+        } else {
+            // Shake animation or visual feedback could go here
+            alert('Still offline. Please check your connection.');
+        }
+    });
+
+    // Check on load
+    updateOnlineStatus();
 }
 
 function initializeTextSpeech() {
@@ -691,6 +751,8 @@ function initializeTextSpeech() {
 
         return `${monthName} ${dayOrdinal}, ${firstSpeech} ${secondSpeech}`;
     }
+
+
 
     locationTextEl.addEventListener('click', () => {
         playText(locationTextEl.textContent);
